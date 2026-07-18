@@ -94,19 +94,27 @@ export default function Study({ words }: Props) {
               correct === null ? '' : correct ? 'is-correct' : 'is-wrong'
             }`}
           >
-            {correct ? (
-              <CheckCircleFilled style={{ fontSize: 32, color: '#52c41a' }} />
-            ) : (
-              <CloseCircleFilled style={{ fontSize: 32, color: '#ff4d4f' }} />
-            )}
-            <Title level={2} style={{ margin: '8px 0' }}>
-              {question.answer.value}
-            </Title>
-            {question.answer.description && <Tag color="blue">{question.answer.description}</Tag>}
-            {!correct && (
-              <Text type="secondary" style={{ marginTop: 8 }}>
-                Ваш ответ: {guess || '—'}
-              </Text>
+            {/* Содержимое оборота показываем только после ответа — иначе при
+                перевороте к новому слову мелькала бы иконка неверного ответа. */}
+            {correct !== null && (
+              <>
+                {correct ? (
+                  <CheckCircleFilled style={{ fontSize: 32, color: '#52c41a' }} />
+                ) : (
+                  <CloseCircleFilled style={{ fontSize: 32, color: '#ff4d4f' }} />
+                )}
+                <Title level={2} style={{ margin: '8px 0' }}>
+                  {question.answer.value}
+                </Title>
+                {question.answer.description && (
+                  <Tag color="blue">{question.answer.description}</Tag>
+                )}
+                {!correct && (
+                  <Text type="secondary" style={{ marginTop: 8 }}>
+                    Ваш ответ: {guess || '—'}
+                  </Text>
+                )}
+              </>
             )}
           </div>
         </div>
