@@ -73,7 +73,13 @@ export default function Study({ words }: Props) {
   if (!question) return null;
 
   return (
-    <Space direction="vertical" size="large" align="center" style={{ width: '100%' }}>
+    <Space
+      className="study-layout"
+      direction="vertical"
+      size="large"
+      align="center"
+      style={{ width: '100%' }}
+    >
       <div className="study-score">
         <span className="study-score__item study-score__item--right">
           <CheckCircleFilled />
