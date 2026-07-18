@@ -49,7 +49,14 @@ export default function Study({ words }: Props) {
   }, [pickRandom]);
 
   useEffect(() => {
-    if (question && !flipped) inputRef.current?.focus();
+    // Автофокус только на десктопе: на тач-устройствах он раскрывает
+    // клавиатуру и проматывает экран к полю. preventScroll — на всякий
+    // случай, чтобы фокус не таскал страницу.
+    const isTouch =
+      typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
+    if (question && !flipped && !isTouch) {
+      inputRef.current?.focus({ preventScroll: true });
+    }
   }, [question, flipped]);
 
   const check = () => {
