@@ -54,7 +54,7 @@ export default function App() {
           </Header>
           <Content
             style={{
-              padding: 24,
+              padding: '8px 24px 24px',
               maxWidth: 820,
               margin: '0 auto',
               width: '100%',
