@@ -75,23 +75,25 @@ export default function DictionaryList({ dictionaries, onChange, onOpen }: Props
               <Card
                 hoverable
                 onClick={() => onOpen(dict)}
-                actions={[
-                  <Popconfirm
-                    key="del"
-                    title="Удалить словарь?"
-                    description="Все слова внутри будут удалены."
-                    okText="Да"
-                    cancelText="Нет"
-                    onConfirm={() => handleDelete(dict.id)}
-                    onPopupClick={(e) => e.stopPropagation()}
-                  >
-                    <DeleteOutlined
-                      style={{ color: '#ff4d4f' }}
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  </Popconfirm>,
-                ]}
+                style={{ position: 'relative' }}
               >
+                <Popconfirm
+                  title="Удалить словарь?"
+                  description="Все слова внутри будут удалены."
+                  okText="Да"
+                  cancelText="Нет"
+                  onConfirm={() => handleDelete(dict.id)}
+                  onPopupClick={(e) => e.stopPropagation()}
+                >
+                  <Button
+                    type="text"
+                    size="small"
+                    icon={<DeleteOutlined />}
+                    danger
+                    onClick={(e) => e.stopPropagation()}
+                    style={{ position: 'absolute', top: 8, right: 8 }}
+                  />
+                </Popconfirm>
                 <Card.Meta
                   avatar={<FolderOpenOutlined style={{ fontSize: 24, color: '#5b8def' }} />}
                   title={dict.name}
