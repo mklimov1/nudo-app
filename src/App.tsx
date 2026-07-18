@@ -36,7 +36,7 @@ export default function App() {
   return (
     <ConfigProvider locale={ruRU} theme={{ token: { colorPrimary: '#5b8def' } }}>
       <AntApp>
-        <Layout style={{ minHeight: '100dvh' }}>
+        <Layout style={{ height: '100dvh', overflow: 'hidden' }}>
           <Header style={{ background: '#fff', display: 'flex', alignItems: 'center', gap: 12 }}>
             {active && (
               <Button
@@ -49,7 +49,18 @@ export default function App() {
               📚 Nudo{active ? ` — ${active.name}` : ' — тренажёр слов'}
             </Title>
           </Header>
-          <Content style={{ padding: 24, maxWidth: 820, margin: '0 auto', width: '100%' }}>
+          <Content
+            style={{
+              padding: 24,
+              maxWidth: 820,
+              margin: '0 auto',
+              width: '100%',
+              flex: 1,
+              minHeight: 0,
+              overflowY: 'auto',
+              overflowX: 'hidden',
+            }}
+          >
             {!active ? (
               <DictionaryList
                 dictionaries={dictionaries}
