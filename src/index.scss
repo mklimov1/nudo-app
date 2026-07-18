@@ -3,20 +3,11 @@
 }
 
 html,
-body {
+body,
+#root {
   margin: 0;
   padding: 0;
-  height: 100%;
-  overflow: hidden;
-}
-
-// Приложение — фиксированный оверлей на весь экран. Окну физически некуда
-// скроллиться, поэтому iOS Safari не может проматывать страницу вверх при
-// фокусе на поле (обычного overflow: hidden на body для этого не хватает).
-#root {
-  position: fixed;
-  inset: 0;
-  overflow: hidden;
+  min-height: 100dvh;
 }
 
 body {

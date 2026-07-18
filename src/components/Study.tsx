@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Button, Empty, Input, Space, Tag, Typography } from 'antd';
+import { Button, Empty, Space, Tag, Typography } from 'antd';
 import { CheckCircleFilled, CloseCircleFilled, RedoOutlined } from '@ant-design/icons';
 import type { IWord } from '../types';
 import { buildPairs } from '../db';
+import AnswerInput, { type AnswerInputHandle } from './AnswerInput';
 import './Study.scss';
 
 const { Title, Text } = Typography;
@@ -26,7 +27,7 @@ export default function Study({ words }: Props) {
   const [flipped, setFlipped] = useState(false);
   const [correct, setCorrect] = useState<boolean | null>(null);
   const [score, setScore] = useState({ right: 0, wrong: 0 });
-  const inputRef = useRef<React.ComponentRef<typeof Input>>(null);
+  const inputRef = useRef<AnswerInputHandle>(null);
 
   const pickRandom = useCallback(() => {
     if (pairs.length === 0) {
@@ -55,7 +56,7 @@ export default function Study({ words }: Props) {
     const isTouch =
       typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
     if (question && !flipped && !isTouch) {
-      inputRef.current?.focus({ preventScroll: true });
+      inputRef.current?.focus();
     }
   }, [question, flipped]);
 
@@ -134,20 +135,13 @@ export default function Study({ words }: Props) {
       </div>
 
       {!flipped ? (
-        <Space.Compact style={{ width: 340 }}>
-          <Input
-            ref={inputRef}
-            size="large"
-            placeholder="Введите перевод"
-            value={guess}
-            onChange={(e) => setGuess(e.target.value)}
-            onPressEnter={check}
-            autoComplete="off"
-          />
-          <Button size="large" type="primary" onClick={check}>
-            Проверить
-          </Button>
-        </Space.Compact>
+        <AnswerInput
+          ref={inputRef}
+          value={guess}
+          onChange={setGuess}
+          onSubmit={check}
+          placeholder="Введите перевод"
+        />
       ) : (
         <Button size="large" type="primary" icon={<RedoOutlined />} onClick={pickRandom}>
           Следующее слово
