@@ -32,10 +32,19 @@ $color-wrong: #ff4d4f;
 .flip-card {
   width: $card-width;
   height: $card-height;
+  max-width: 100%;
   perspective: 1200px;
 
   &.is-flipped .flip-card-inner {
     transform: rotateX(180deg);
+  }
+}
+
+// На мобилке делаем карточку ниже и убираем лишние отступы, чтобы поле
+// ввода оказалось повыше — над зоной клавиатуры, и iOS не приподнимал экран.
+@media (max-width: 600px) {
+  .flip-card {
+    height: 160px;
   }
 }
 

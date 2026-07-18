@@ -36,7 +36,7 @@ export default function App() {
   return (
     <ConfigProvider locale={ruRU} theme={{ token: { colorPrimary: '#5b8def' } }}>
       <AntApp>
-        <Layout style={{ height: '100dvh', overflow: 'hidden' }}>
+        <Layout style={{ height: '100%', overflow: 'hidden' }}>
           <Header style={{ background: '#fff', display: 'flex', alignItems: 'center', gap: 12 }}>
             {active && (
               <Button
