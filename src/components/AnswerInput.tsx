@@ -38,6 +38,47 @@ const AnswerInput = forwardRef<AnswerInputHandle, Props>(function AnswerInput(
 
   const syncCaret = () => setCaret(realRef.current?.selectionStart ?? value.length);
 
+  // Клик/тап по прокси: вычисляем индекс символа под курсором и переносим
+  // туда каретку скрытого инпута. Так работает и мышью, и пальцем на мобилке.
+  const positionCaret = (e: React.MouseEvent<HTMLLabelElement>) => {
+    const input = realRef.current;
+    if (!input) return;
+
+    const doc = document as Document & {
+      caretRangeFromPoint?: (x: number, y: number) => Range | null;
+      caretPositionFromPoint?: (
+        x: number,
+        y: number,
+      ) => { offsetNode: Node; offset: number } | null;
+    };
+
+    let node: Node | null = null;
+    let offset = 0;
+    const range = doc.caretRangeFromPoint?.(e.clientX, e.clientY);
+    if (range) {
+      node = range.startContainer;
+      offset = range.startOffset;
+    } else {
+      const pos = doc.caretPositionFromPoint?.(e.clientX, e.clientY);
+      if (pos) {
+        node = pos.offsetNode;
+        offset = pos.offset;
+      }
+    }
+
+    const span = node?.nodeType === Node.TEXT_NODE ? node.parentElement : (node as Element | null);
+    const base = span?.getAttribute('data-base');
+    if (base == null) {
+      input.focus({ preventScroll: true });
+      return;
+    }
+
+    const idx = Math.max(0, Math.min(value.length, Number(base) + offset));
+    input.focus({ preventScroll: true });
+    input.setSelectionRange(idx, idx);
+    setCaret(idx);
+  };
+
   return (
     <div className="answer-input">
       {/* Настоящий инпут — скрыт вверху страницы, но фокусируется и печатает */}
@@ -69,15 +110,24 @@ const AnswerInput = forwardRef<AnswerInputHandle, Props>(function AnswerInput(
       <label
         className={`answer-input__proxy${focused ? ' is-focused' : ''}`}
         htmlFor="answer-real-input"
+        onClick={positionCaret}
       >
         {focused ? (
           <>
-            <span className="answer-input__value">{value.slice(0, caret)}</span>
+            <span className="answer-input__value" data-base={0}>
+              {value.slice(0, caret)}
+            </span>
             <span className="answer-input__caret" />
-            <span className="answer-input__value">{value.slice(caret)}</span>
+            <span className="answer-input__value" data-base={caret}>
+              {value.slice(caret)}
+            </span>
           </>
         ) : (
-          value && <span className="answer-input__value">{value}</span>
+          value && (
+            <span className="answer-input__value" data-base={0}>
+              {value}
+            </span>
+          )
         )}
         {!value && <span className="answer-input__placeholder">{placeholder}</span>}
       </label>
