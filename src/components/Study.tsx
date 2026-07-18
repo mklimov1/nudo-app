@@ -90,7 +90,9 @@ export default function Study({ words }: Props) {
           </div>
           {/* Оборот: ответ */}
           <div
-            className={`flip-card-face flip-card-back ${correct ? 'is-correct' : 'is-wrong'}`}
+            className={`flip-card-face flip-card-back ${
+              correct === null ? '' : correct ? 'is-correct' : 'is-wrong'
+            }`}
           >
             {correct ? (
               <CheckCircleFilled style={{ fontSize: 32, color: '#52c41a' }} />

@@ -93,13 +93,22 @@ export async function deleteDictionary(id: string): Promise<void> {
   await tx.done;
 }
 
-/** Количество записей в каждом словаре, ключ — id словаря. */
+/** Количество пар «слово ⇄ перевод» в каждом словаре, ключ — id словаря. */
 export async function getWordCounts(): Promise<Record<string, number>> {
   const db = await getDB();
   const words = await db.getAll('words');
-  const counts: Record<string, number> = {};
+
+  // Группируем записи по словарям и считаем именно пары, а не записи.
+  const byDict = new Map<string, IWord[]>();
   for (const w of words) {
-    counts[w.dictionaryId] = (counts[w.dictionaryId] ?? 0) + 1;
+    const list = byDict.get(w.dictionaryId) ?? [];
+    list.push(w);
+    byDict.set(w.dictionaryId, list);
+  }
+
+  const counts: Record<string, number> = {};
+  for (const [dictId, list] of byDict) {
+    counts[dictId] = buildPairs(list).length;
   }
   return counts;
 }
