@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { App as AntApp, Button, ConfigProvider, Layout, Space, Tabs, Typography } from 'antd';
+import { App as AntApp, Button, ConfigProvider, Layout, Tabs, Typography } from 'antd';
 import { ArrowLeftOutlined, BookOutlined, ThunderboltOutlined } from '@ant-design/icons';
 import ruRU from 'antd/locale/ru_RU';
 import type { IDictionary, IWord } from './types';
