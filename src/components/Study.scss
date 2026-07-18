@@ -1,0 +1,81 @@
+$card-width: 340px;
+$card-height: 220px;
+$flip-duration: 0.6s;
+$color-right: #52c41a;
+$color-wrong: #ff4d4f;
+
+.study-score {
+  position: fixed;
+  top: 76px;
+  right: 24px;
+  display: flex;
+  gap: 12px;
+  z-index: 10;
+
+  &__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 600;
+    font-size: 15px;
+
+    &--right {
+      color: $color-right;
+    }
+
+    &--wrong {
+      color: $color-wrong;
+    }
+  }
+}
+
+.flip-card {
+  width: $card-width;
+  height: $card-height;
+  perspective: 1200px;
+
+  &.is-flipped .flip-card-inner {
+    transform: rotateX(180deg);
+  }
+}
+
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform $flip-duration cubic-bezier(0.4, 0.2, 0.2, 1);
+  transform-style: preserve-3d;
+}
+
+.flip-card-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  border-radius: 16px;
+  backface-visibility: hidden;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  background: #ffffff;
+}
+
+.flip-card-front {
+  border: 1px solid #f0f0f0;
+}
+
+.flip-card-back {
+  transform: rotateX(180deg);
+  border: 2px solid transparent;
+
+  &.is-correct {
+    border-color: #52c41a;
+    background: #f6ffed;
+  }
+
+  &.is-wrong {
+    border-color: #ff4d4f;
+    background: #fff1f0;
+  }
+}
