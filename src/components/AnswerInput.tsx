@@ -14,77 +14,81 @@ interface Props {
   buttonText?: string;
 }
 
+const INPUT_ID = 'answer-real-input';
+
+/**
+ * Абсолютный индекс символа под точкой (x, y) внутри прокси, либо null.
+ * Разбиение текста на две части помечено атрибутом data-base (сколько
+ * символов идёт до этого span), поэтому итоговый индекс = base + offset.
+ */
+function charIndexFromPoint(x: number, y: number): number | null {
+  const doc = document as Document & {
+    caretRangeFromPoint?(x: number, y: number): Range | null;
+    caretPositionFromPoint?(x: number, y: number): { offsetNode: Node; offset: number } | null;
+  };
+
+  let node: Node | null = null;
+  let offset = 0;
+  const range = doc.caretRangeFromPoint?.(x, y);
+  if (range) {
+    node = range.startContainer;
+    offset = range.startOffset;
+  } else {
+    const pos = doc.caretPositionFromPoint?.(x, y);
+    if (pos) {
+      node = pos.offsetNode;
+      offset = pos.offset;
+    }
+  }
+
+  const el = node?.nodeType === Node.TEXT_NODE ? node.parentElement : (node as Element | null);
+  const base = el?.getAttribute('data-base');
+  return base == null ? null : Number(base) + offset;
+}
+
 /**
  * Поле ответа, устойчивое к «прыжку» экрана на iOS.
  *
- * Хитрость: настоящий <input> зафиксирован в самом верху экрана (там он уже
- * виден над клавиатурой), поэтому Safari при фокусе не проматывает страницу.
- * Видимое поле — это <label>, который через htmlFor нативно фокусирует
- * скрытый инпут и показывает введённый текст.
+ * Настоящий <input> зафиксирован в самом верху экрана (там он уже виден над
+ * клавиатурой), поэтому Safari при фокусе не проматывает страницу. Видимое
+ * поле — это <label>, который через htmlFor фокусирует скрытый инпут и
+ * отображает введённый текст с собственной кареткой.
  */
 const AnswerInput = forwardRef<AnswerInputHandle, Props>(function AnswerInput(
   { value, onChange, onSubmit, placeholder, buttonText = 'Проверить' },
   ref,
 ) {
-  const realRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const [focused, setFocused] = useState(false);
-  // Позиция каретки = selectionStart скрытого инпута, чтобы её можно было
-  // двигать стрелками, а не держать только в конце текста.
+  // Позиция каретки = selectionStart скрытого инпута (двигается стрелками и
+  // кликом, а не только в конце). Клампим на случай, если value стало короче.
   const [caret, setCaret] = useState(0);
+  const caretPos = Math.min(caret, value.length);
 
   useImperativeHandle(ref, () => ({
-    focus: () => realRef.current?.focus({ preventScroll: true }),
+    focus: () => inputRef.current?.focus({ preventScroll: true }),
   }));
 
-  const syncCaret = () => setCaret(realRef.current?.selectionStart ?? value.length);
+  const syncCaret = () => setCaret(inputRef.current?.selectionStart ?? value.length);
 
-  // Клик/тап по прокси: вычисляем индекс символа под курсором и переносим
-  // туда каретку скрытого инпута. Так работает и мышью, и пальцем на мобилке.
-  const positionCaret = (e: React.MouseEvent<HTMLLabelElement>) => {
-    const input = realRef.current;
+  // Клик/тап по видимому полю переносит каретку в точку нажатия.
+  const handleClick = (e: React.MouseEvent<HTMLLabelElement>) => {
+    const input = inputRef.current;
     if (!input) return;
-
-    const doc = document as Document & {
-      caretRangeFromPoint?: (x: number, y: number) => Range | null;
-      caretPositionFromPoint?: (
-        x: number,
-        y: number,
-      ) => { offsetNode: Node; offset: number } | null;
-    };
-
-    let node: Node | null = null;
-    let offset = 0;
-    const range = doc.caretRangeFromPoint?.(e.clientX, e.clientY);
-    if (range) {
-      node = range.startContainer;
-      offset = range.startOffset;
-    } else {
-      const pos = doc.caretPositionFromPoint?.(e.clientX, e.clientY);
-      if (pos) {
-        node = pos.offsetNode;
-        offset = pos.offset;
-      }
-    }
-
-    const span = node?.nodeType === Node.TEXT_NODE ? node.parentElement : (node as Element | null);
-    const base = span?.getAttribute('data-base');
-    if (base == null) {
-      input.focus({ preventScroll: true });
-      return;
-    }
-
-    const idx = Math.max(0, Math.min(value.length, Number(base) + offset));
     input.focus({ preventScroll: true });
-    input.setSelectionRange(idx, idx);
-    setCaret(idx);
+    const idx = charIndexFromPoint(e.clientX, e.clientY);
+    if (idx == null) return;
+    const clamped = Math.max(0, Math.min(value.length, idx));
+    input.setSelectionRange(clamped, clamped);
+    setCaret(clamped);
   };
 
   return (
     <div className="answer-input">
       {/* Настоящий инпут — скрыт вверху страницы, но фокусируется и печатает */}
       <input
-        id="answer-real-input"
-        ref={realRef}
+        id={INPUT_ID}
+        ref={inputRef}
         className="answer-input__real"
         value={value}
         onChange={(e) => {
@@ -106,36 +110,28 @@ const AnswerInput = forwardRef<AnswerInputHandle, Props>(function AnswerInput(
         autoCapitalize="off"
         spellCheck={false}
       />
-      {/* Видимый прокси: клик по label нативно фокусирует скрытый инпут */}
+
+      {/* Видимый прокси: делит текст в позиции каретки и рисует её на стыке */}
       <label
         className={`answer-input__proxy${focused ? ' is-focused' : ''}`}
-        htmlFor="answer-real-input"
+        htmlFor={INPUT_ID}
         onMouseDown={(e) => {
-          // Не даём mousedown увести фокус с уже сфокусированного инпута —
-          // иначе каретка мигает/пропадает. Первый фокус (жест) не трогаем.
-          if (document.activeElement === realRef.current) e.preventDefault();
+          // Не даём mousedown снять фокус с уже активного инпута (иначе каретка
+          // пропадает). Первый фокус-жест не трогаем — важно для iOS.
+          if (document.activeElement === inputRef.current) e.preventDefault();
         }}
-        onClick={positionCaret}
+        onClick={handleClick}
       >
-        {focused ? (
-          <>
-            <span className="answer-input__value" data-base={0}>
-              {value.slice(0, caret)}
-            </span>
-            <span className="answer-input__caret" />
-            <span className="answer-input__value" data-base={caret}>
-              {value.slice(caret)}
-            </span>
-          </>
-        ) : (
-          value && (
-            <span className="answer-input__value" data-base={0}>
-              {value}
-            </span>
-          )
-        )}
+        <span className="answer-input__value" data-base={0}>
+          {value.slice(0, caretPos)}
+        </span>
+        {focused && <span className="answer-input__caret" aria-hidden />}
+        <span className="answer-input__value" data-base={caretPos}>
+          {value.slice(caretPos)}
+        </span>
         {!value && <span className="answer-input__placeholder">{placeholder}</span>}
       </label>
+
       <Button
         size="large"
         type="primary"
