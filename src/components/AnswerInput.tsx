@@ -110,6 +110,11 @@ const AnswerInput = forwardRef<AnswerInputHandle, Props>(function AnswerInput(
       <label
         className={`answer-input__proxy${focused ? ' is-focused' : ''}`}
         htmlFor="answer-real-input"
+        onMouseDown={(e) => {
+          // Не даём mousedown увести фокус с уже сфокусированного инпута —
+          // иначе каретка мигает/пропадает. Первый фокус (жест) не трогаем.
+          if (document.activeElement === realRef.current) e.preventDefault();
+        }}
         onClick={positionCaret}
       >
         {focused ? (
