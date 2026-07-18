@@ -50,3 +50,19 @@
 .answer-input__placeholder {
   color: rgba(0, 0, 0, 0.35);
 }
+
+// Псевдо-каретка: настоящий инпут скрыт, поэтому рисуем мигающую черту сами.
+.answer-input__caret {
+  flex: none;
+  width: 1px;
+  height: 1.1em;
+  margin: 0 1px;
+  background: #333;
+  animation: answer-caret-blink 1.1s step-end infinite;
+}
+
+@keyframes answer-caret-blink {
+  50% {
+    opacity: 0;
+  }
+}

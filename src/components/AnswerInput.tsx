@@ -1,4 +1,4 @@
-import { forwardRef, useImperativeHandle, useRef } from 'react';
+import { forwardRef, useImperativeHandle, useRef, useState } from 'react';
 import { Button } from 'antd';
 import './AnswerInput.scss';
 
@@ -27,6 +27,7 @@ const AnswerInput = forwardRef<AnswerInputHandle, Props>(function AnswerInput(
   ref,
 ) {
   const realRef = useRef<HTMLInputElement>(null);
+  const [focused, setFocused] = useState(false);
 
   useImperativeHandle(ref, () => ({
     focus: () => realRef.current?.focus({ preventScroll: true }),
@@ -44,18 +45,21 @@ const AnswerInput = forwardRef<AnswerInputHandle, Props>(function AnswerInput(
         onKeyDown={(e) => {
           if (e.key === 'Enter') onSubmit();
         }}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
         autoComplete="off"
         autoCorrect="off"
         autoCapitalize="off"
         spellCheck={false}
       />
       {/* Видимый прокси: клик по label нативно фокусирует скрытый инпут */}
-      <label className="answer-input__proxy" htmlFor="answer-real-input">
-        {value ? (
-          <span className="answer-input__value">{value}</span>
-        ) : (
-          <span className="answer-input__placeholder">{placeholder}</span>
-        )}
+      <label
+        className={`answer-input__proxy${focused ? ' is-focused' : ''}`}
+        htmlFor="answer-real-input"
+      >
+        {value && <span className="answer-input__value">{value}</span>}
+        {focused && <span className="answer-input__caret" />}
+        {!value && <span className="answer-input__placeholder">{placeholder}</span>}
       </label>
       <Button
         size="large"
