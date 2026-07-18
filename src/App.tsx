@@ -37,7 +37,10 @@ export default function App() {
     <ConfigProvider locale={ruRU} theme={{ token: { colorPrimary: '#5b8def' } }}>
       <AntApp>
         <Layout style={{ height: '100%', overflow: 'hidden' }}>
-          <Header style={{ background: '#fff', display: 'flex', alignItems: 'center', gap: 12 }}>
+          <Header
+            className="app-header"
+            style={{ background: '#fff', display: 'flex', alignItems: 'center', gap: 12 }}
+          >
             {active && (
               <Button
                 type="text"
@@ -45,7 +48,7 @@ export default function App() {
                 onClick={() => setActive(null)}
               />
             )}
-            <Title level={3} style={{ margin: 0 }}>
+            <Title level={3} className="app-header__title" style={{ margin: 0 }}>
               📚 Nudo{active ? ` — ${active.name}` : ' — тренажёр слов'}
             </Title>
           </Header>

@@ -31,3 +31,19 @@ textarea.ant-input,
 .ant-input-affix-wrapper input {
   font-size: 16px;
 }
+
+// На мобилке ужимаем шапку: меньше высота и шрифт, заголовок в одну строку.
+@media (max-width: 600px) {
+  .app-header {
+    height: 52px;
+    line-height: 52px;
+    padding-inline: 12px;
+  }
+
+  .app-header__title {
+    font-size: 17px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
