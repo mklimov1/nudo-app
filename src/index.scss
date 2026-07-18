@@ -23,24 +23,6 @@ textarea.ant-input,
   font-size: 16px;
 }
 
-// Хак против прокрутки страницы на iOS Safari при фокусе на поле: короткая
-// анимация прозрачности «сбивает» браузер, и он не проматывает к инпуту.
-// Нативное поле при этом сохраняет выделение, каретку, IME и т.д.
-@keyframes ios-no-scroll-on-focus {
-  from {
-    opacity: 0.99;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-input.ant-input:focus,
-textarea.ant-input:focus,
-.ant-input-affix-wrapper-focused input {
-  animation: ios-no-scroll-on-focus 0.01s;
-}
-
 // На мобилке ужимаем шапку: меньше высота и шрифт, заголовок в одну строку.
 @media (max-width: 600px) {
   .app-header {
