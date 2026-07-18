@@ -33,6 +33,31 @@ export default function App() {
     else setWords([]);
   }, [active, reloadWords]);
 
+  // На iOS при открытии клавиатуры Safari панорамирует страницу, чтобы
+  // показать поле. Подгоняем #root ровно под видимую область (visualViewport),
+  // тогда панорамировать нечего — приложение всегда над клавиатурой.
+  useEffect(() => {
+    const vv = window.visualViewport;
+    const root = document.getElementById('root');
+    if (!vv || !root) return;
+
+    const update = () => {
+      root.style.height = `${vv.height}px`;
+      root.style.top = `${vv.offsetTop}px`;
+      root.style.bottom = 'auto';
+    };
+    update();
+    vv.addEventListener('resize', update);
+    vv.addEventListener('scroll', update);
+    return () => {
+      vv.removeEventListener('resize', update);
+      vv.removeEventListener('scroll', update);
+      root.style.height = '';
+      root.style.top = '';
+      root.style.bottom = '';
+    };
+  }, []);
+
   return (
     <ConfigProvider locale={ruRU} theme={{ token: { colorPrimary: '#5b8def' } }}>
       <AntApp>
