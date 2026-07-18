@@ -28,10 +28,15 @@ const AnswerInput = forwardRef<AnswerInputHandle, Props>(function AnswerInput(
 ) {
   const realRef = useRef<HTMLInputElement>(null);
   const [focused, setFocused] = useState(false);
+  // Позиция каретки = selectionStart скрытого инпута, чтобы её можно было
+  // двигать стрелками, а не держать только в конце текста.
+  const [caret, setCaret] = useState(0);
 
   useImperativeHandle(ref, () => ({
     focus: () => realRef.current?.focus({ preventScroll: true }),
   }));
+
+  const syncCaret = () => setCaret(realRef.current?.selectionStart ?? value.length);
 
   return (
     <div className="answer-input">
@@ -41,11 +46,19 @@ const AnswerInput = forwardRef<AnswerInputHandle, Props>(function AnswerInput(
         ref={realRef}
         className="answer-input__real"
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => {
+          onChange(e.target.value);
+          setCaret(e.target.selectionStart ?? e.target.value.length);
+        }}
         onKeyDown={(e) => {
           if (e.key === 'Enter') onSubmit();
         }}
-        onFocus={() => setFocused(true)}
+        onKeyUp={syncCaret}
+        onSelect={syncCaret}
+        onFocus={() => {
+          setFocused(true);
+          syncCaret();
+        }}
         onBlur={() => setFocused(false)}
         autoComplete="off"
         autoCorrect="off"
@@ -57,8 +70,15 @@ const AnswerInput = forwardRef<AnswerInputHandle, Props>(function AnswerInput(
         className={`answer-input__proxy${focused ? ' is-focused' : ''}`}
         htmlFor="answer-real-input"
       >
-        {value && <span className="answer-input__value">{value}</span>}
-        {focused && <span className="answer-input__caret" />}
+        {focused ? (
+          <>
+            <span className="answer-input__value">{value.slice(0, caret)}</span>
+            <span className="answer-input__caret" />
+            <span className="answer-input__value">{value.slice(caret)}</span>
+          </>
+        ) : (
+          value && <span className="answer-input__value">{value}</span>
+        )}
         {!value && <span className="answer-input__placeholder">{placeholder}</span>}
       </label>
       <Button
