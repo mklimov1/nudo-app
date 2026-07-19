@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Empty, Space, Tag, Typography } from 'antd';
+import type { InputRef } from 'antd';
 import { CheckCircleFilled, CloseCircleFilled, RedoOutlined } from '@ant-design/icons';
 import type { IWord } from '../types';
 import { buildPairs } from '../db';
-import AnswerInput, { type AnswerInputHandle } from './AnswerInput';
+import AnswerInput from './AnswerInput';
 import './Study.scss';
 
 const { Title, Text } = Typography;
@@ -27,7 +28,7 @@ export default function Study({ words }: Props) {
   const [flipped, setFlipped] = useState(false);
   const [correct, setCorrect] = useState<boolean | null>(null);
   const [score, setScore] = useState({ right: 0, wrong: 0 });
-  const inputRef = useRef<AnswerInputHandle>(null);
+  const inputRef = useRef<InputRef>(null);
 
   const pickRandom = useCallback(() => {
     if (pairs.length === 0) {
